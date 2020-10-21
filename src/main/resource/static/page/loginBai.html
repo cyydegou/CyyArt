@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>登录</title>
+    <meta name="keywords" content="活动兑奖,优学派">
+    <meta name="description" content="优学派活动兑奖">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no"/>
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.picker.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.poppicker.css">
+	<link rel="stylesheet" type="text/css" href="../css/swiper/swiper.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css?v=1.0">
+<style>
+select {
+    float: right;
+    width: 40%;
+    font-size: 14px;
+    height: auto;
+    margin-top: 1px;
+    border: 1px solid #e0e0e0!important;
+    background-color: #fff;
+}
+
+.bai_title {
+    text-align: center;
+    font-size: 30px;
+    margin: 40px;
+    color: #E56130;
+}
+#goSubmit{
+	background-color: #E56130 !important;
+}
+
+.receiveForm li label {
+    color: #E56130;
+}
+</style>
+</head>
+<body class="whiteBg"> 
+	<div class="bai_title">白秋节APP的信息</div>
+	<div class="mainer">
+		<ul class="receiveForm">
+			<li><label>*用户名：</label><input id="name" name="name" type="text"></li>
+			<li style="border-bottom: 1px solid #e2e2e2;"><label>*密码：</label><input id="password" name="password" type="password" maxlength="18"></li>
+			
+		<div id="goSubmit">确定</div>
+	</div>
+	<script type="text/javascript" src="../css/layer/layer.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.picker.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/city.data-3.js"></script>
+	<script type="text/javascript" src="../js/swiper/swiper.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" charset="utf8"
+	src="../js/dataTables/jquery.js"></script>
+    <script type="text/javascript">		
+    
+	$("#goSubmit").click(function(){
+		checkSubmit();
+	});
+	
+  	
+   	function checkSubmit(){
+   		var name = trim($("#name").val()),
+   			password = $("#password").val();
+   			
+   		if(name==''){
+   			layerMsg("请填写用户名");
+   			return false;
+   		}
+
+   		if(password==''){
+   			layerMsg("请填写密码");
+   			return false;
+   		}
+
+    	ajaxUrl(name,password);
+	}
+   	
+   	function ajaxUrl(name,password){
+		$.ajax({
+   			type: 'POST',
+   	    	dataType: "json",
+   	        url: "/user/new/loginbai.json",
+   	        data: {"name":name,"password":password},
+   			async: true,
+   			timeout: 300000,
+   			beforeSend: function(){
+   				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>登录中</span>'
+				});
+				},
+   	        success: function(data){
+   	        	layer.closeAll();
+   	        	var msgcode = data.code,
+   	        		message = data.message;
+   	        	if(msgcode==1){
+   	        		window.location.href="../pagenew/grabListNew.html";
+   	        	}else if(msgcode==2){
+   	        		layerMsg("登录失败！请联系管理员");
+   	        	}else if(msgcode==4){
+   	        		window.location.href="login.html";
+   	        	}else{
+   	        		layerMsg(message);
+   	        	}
+   	        },
+   			error: function(){
+   				layer.closeAll();
+   				layerMsg("网络出错！");
+   			}
+   		});
+    }
+
+   	function trim(str){
+   		return str.replace(/(^\s+|\s$)/g,"");
+   	}
+   	
+   	function layerMsg(content){
+   		layer.open({
+	    	content: content,
+	    	skin: 'msg',
+	    	time: 3
+	  	});
+   		
+	  	layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+   	}
+   	
+ 	function layerTip(content){
+ 		layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+ 	}
+ 	
+	</script>
+</body>
+</html>

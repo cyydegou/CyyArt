@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cyyGroup.cyyArt.money.dao.UserDao">
+	<select id="getUserByNamePass" resultType="cyyGroup.cyyArt.vo.User">
+       SELECT
+		a.id AS id,
+		a.weixin_id AS weixinId,
+		a.weixin_name AS weixinName,
+		a.real_name as 'realName',
+		a.remark as 'remark',
+		a.type as type
+	FROM
+		t_user a
+	where a.real_name=#{name,jdbcType=VARCHAR}
+	  and a.password=#{encode,jdbcType=VARCHAR}
+    </select>
+    
+    <insert id="saveUser">
+    	INSERT INTO `t_user` (
+			`weixin_id`,
+			`weixin_name`,
+			`real_name`,
+			`available`,
+			`remark`,
+			`create_time`,
+			`type`,
+			`password`,
+			`buyer_id`,
+			`province`,
+			`city`,
+			`county`,
+			`tel`,
+			`addressDetail`,
+			belong_id
+		)
+		VALUES
+			(
+				#{user.weixinId,jdbcType=VARCHAR},
+				#{user.weixinName,jdbcType=VARCHAR},
+				#{user.userName,jdbcType=VARCHAR},
+				'1',
+				#{user.remark,jdbcType=VARCHAR},
+				now(),
+				#{user.type,jdbcType=NUMERIC},
+				#{user.password,jdbcType=VARCHAR},
+				#{user.id,jdbcType=NUMERIC},
+				#{user.province,jdbcType=VARCHAR},
+				#{user.city,jdbcType=VARCHAR},
+				#{user.county,jdbcType=VARCHAR},
+				#{user.tel,jdbcType=VARCHAR},
+				#{user.addressDetail,jdbcType=VARCHAR},
+				#{user.belongId,jdbcType=NUMERIC}
+			)
+    </insert>
+    
+    <select id="getUserByBuyerId" resultType="cyyGroup.cyyArt.vo.User">
+       SELECT
+			a.id AS id,
+			a.weixin_id AS weixinId,
+			a.weixin_name AS weixinName,
+			a.real_name as 'realName',
+			a.remark as 'remark',
+			a.type as type
+		FROM
+			t_user a
+		where a.buyer_id=#{id,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getUserList" resultType="cyyGroup.cyyArt.vo.User">
+       select 
+            id,
+            `weixin_id` as weixinId,
+			`weixin_name` as weixinName,
+			`real_name` as realName,
+			`available` as available,
+			`remark` as remark,
+			`create_time` as createTime,
+			`type` as type,
+			`password` as password,
+			`buyer_id` as buyerId,
+			`province` as province,
+			`city`,
+			`county`,
+			`tel`,
+			`addressDetail`,
+			choice,
+			default_buyer as defaultBuyer
+		from t_user
+		where type = 1
+		  and available = 1
+		  and belong_id = #{userId,jdbcType=NUMERIC}
+		order by default_buyer desc,choice desc
+    </select>
+    
+    <select id="getAttribute" resultType="java.lang.String">
+       select attr_value
+		from t_attribute
+		where attr_key = #{key,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getUserListByRealNameTel" resultType="cyyGroup.cyyArt.vo.User">
+       select 
+            id,
+            `weixin_id` as weixinId,
+			`weixin_name` as weixinName,
+			`real_name` as realName,
+			`available` as available,
+			`remark` as remark,
+			`create_time` as createTime,
+			`type` as type,
+			`password` as password,
+			`buyer_id` as buyerId,
+			`province` as province,
+			`city`,
+			`county`,
+			`tel`,
+			`addressDetail`
+		from t_user
+		where real_name = #{name,jdbcType=VARCHAR}
+		  and tel = #{tel,jdbcType=VARCHAR}
+    </select>
+    
+    <update id="updateAttr">
+       update t_attribute
+          set attr_value = #{kdt_id,jdbcType=VARCHAR}
+	    where belong_id =  #{belongId,jdbcType=NUMERIC}
+	      and attr_key = #{attr,jdbcType=NUMERIC}
+    </update>
+    
+    <select id="getUserById" resultType="cyyGroup.cyyArt.vo.User">
+       SELECT
+			a.id AS id,
+			a.weixin_id AS weixinId,
+			a.weixin_name AS weixinName,
+			a.real_name as 'realName',
+			a.remark as 'remark',
+			a.type as type,
+			a.`province` as province,
+			a.`city`,
+			a.`county`,
+			a.`tel`,
+			a.`addressDetail`,
+			a.buyer_id as buyerId,
+			a.default_buyer as defaultBuyer
+		FROM
+			t_user a
+		where a.id=#{userId,jdbcType=VARCHAR}
+    </select>
+    
+    <update id="clearChoice">
+       update t_user
+          set choice = 0
+    </update>
+    
+    <update id="updateChoice">
+       update t_user
+          set choice = #{user.choice,jdbcType=NUMERIC}
+        where id = #{user.id,jdbcType=NUMERIC}
+    </update>
+    
+    <update id="updateDefault">
+       update t_user
+          set default_buyer = #{type,jdbcType=NUMERIC}
+        <if test="id != null">
+        	where id = #{id,jdbcType=NUMERIC}
+        </if>
+    </update>
+    
+    <select id="getUserByDefault" resultType="cyyGroup.cyyArt.vo.User">
+       SELECT
+			a.id AS id,
+			a.weixin_id AS weixinId,
+			a.weixin_name AS weixinName,
+			a.real_name as 'realName',
+			a.remark as 'remark',
+			a.type as type,
+			a.`province` as province,
+			a.`city`,
+			a.`county`,
+			a.`tel`,
+			a.`addressDetail`,
+			a.buyer_id as buyerId,
+			a.default_buyer as defaultBuyer
+		FROM
+			t_user a
+		where a.default_buyer=1
+		limit 1
+    </select>
+</mapper>
+

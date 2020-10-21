@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>查询物流</title>
+    <meta name="keywords" content="活动兑奖,优学派">
+    <meta name="description" content="优学派活动兑奖">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no"/>
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.picker.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.poppicker.css">
+	<link rel="stylesheet" type="text/css" href="../css/swiper/swiper.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css?v=1.0">
+<style>
+select {
+    float: right;
+    width: 40%;
+    font-size: 14px;
+    height: auto;
+    margin-top: 1px;
+    border: 1px solid #e0e0e0!important;
+    background-color: #fff;
+}
+
+#showDemo1 {
+    float: right;
+    color: #0080FF;
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>
+</head>
+<body class="whiteBg"> 
+	<div class="mainer">
+		<ul class="receiveForm">
+			<li style="border-top: none;">
+				<br><p id="id_company"></p>
+				<br><p id="id_expNo"></p>
+				<br><p id="id_expStatus"></p>
+			</li>
+			<li style="border-top: none;" id="id_expDetailList">
+				
+			</li>
+		</ul> 
+		<div id="goSubmit">返  回</div>
+	</div>
+	<script type="text/javascript" src="../css/layer/layer.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.picker.min.js"></script>
+	<script type="text/javascript" src="../js/swiper/swiper.min.js"></script>
+	<script type="text/javascript" src="../js/common/common.js"></script>
+	<script type="text/javascript" charset="utf8"
+	src="../js/dataTables/jquery.js"></script>
+    <script type="text/javascript">	
+    var param = GetRequest(this);
+    
+    initExp();
+    
+    function initExp(){
+    	$.ajax({
+   			type: 'GET',
+   	        url: "/order/getexp.json",
+   	        data:{"id":param.id},
+   			async: true,
+   			timeout: 300000,
+   			beforeSend: function(){
+			},
+   	        success: function(data){
+   	        	layer.closeAll();
+   	        	var msgcode = data.code,
+   	        		message = data.message;
+   	        	if(msgcode == null){
+   	        		data = JSON.parse(data);
+   	        		msgcode = data.code,
+   	        		message = data.message;
+   	        	}
+   	        	if(msgcode==1){
+   	        		initExpDetail(data.data);
+   	        	}else if(msgcode==4){
+   	        		window.location.href="login.html";
+   	        	}else if(msgcode==2){
+   	        		layerMsg("更新失败！");
+   	        	}
+   	        },
+   			error: function(){
+   				layer.closeAll();
+   				layerMsg("网络出错！");
+   			}
+   		});
+    }
+    
+    function initExpDetail(data){
+    	$("#id_company").html("快递公司："+data.expressCompanyName);
+    	$("#id_expNo").html("快递单号："+data.expressNo);
+    	var info = (data.expressStatus==null||data.expressStatus=='')?"暂无快递信息":data.expressStatus;
+    	$("#id_expStatus").html("快递状态："+info);
+    	if(data.expressProgress == null){
+    		$("#id_expDetailList").append("<p>暂无快递详情</p>");
+    		return;
+    	}
+    	
+    	var singleDetail = "";
+    	for(var i=0;i<data.expressProgress.length;i++){
+    		singleDetail = data.expressProgress[i].time+"&nbsp;&nbsp;"+data.expressProgress[i].context;
+    		$("#id_expDetailList").append("<p>"+singleDetail+"</p>");
+    	}
+    }
+    
+    $("#goSubmit").click(function(){
+    	window.location.href="orderRecordsList.html";
+    });
+	</script>
+</body>
+</html>

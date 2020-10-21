@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>增加订单</title>
+    <meta name="keywords" content="活动兑奖,优学派">
+    <meta name="description" content="优学派活动兑奖">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no"/>
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.picker.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.poppicker.css">
+	<link rel="stylesheet" type="text/css" href="../css/swiper/swiper.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css?v=1.0">
+<style>
+select {
+    float: right;
+    width: 40%;
+    font-size: 14px;
+    height: auto;
+    margin-top: 1px;
+    border: 1px solid #e0e0e0!important;
+    background-color: #fff;
+}
+
+#showDemo1 {
+    float: right;
+    color: #0080FF;
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>
+</head>
+<body class="whiteBg"> 
+	<div class="mainer">
+		<div class="bannerbg"></div>
+		<!-- <div class="banner">
+			<div class="swiper-container">
+	            <div class="swiper-wrapper">
+	            	<div class="swiper-slide"><img src="images/demo.jpg"></div>
+	            	<div class="swiper-slide"><img src="images/demo1.jpg"></div>
+		        </div>
+	            <div class="swiper-pagination"></div>
+	            <div class="swiper-button-prev swiper-button-white"></div>
+	            <div class="swiper-button-next swiper-button-white"></div>
+	        </div>
+        </div> -->
+		<div class="smallTitle">- 有*的是必填项 - </div>
+		<ul class="receiveForm">
+			<li><label>*商品名：</label><input id="name" name="name" type="text"></li>
+			<li><label>颜色：</label><input id="color" name="color" type="text" maxlength="18"></li>
+			<li style="padding: 0px 0;"><label>规格：</label>
+			<select id="size" style="margin-top: 9px;">
+			  <option value ="1">均码</option>
+			  <option value ="2">S</option>
+			  <option value ="3">M</option>
+			  <option value ="4">L</option>
+			  <option value ="5">XL</option>
+			  <option value ="5">XXL</option>
+			</select>
+			</li>
+			<li><label>*购买人：</label><input id="userId" name="userId" type="text" maxlength="11"></li>
+
+			<li><p class="clearfix">商品照片：</p>
+				<div id="uploadPhoto1" class="prizePhotoUpload"></div>
+				<input id="prizePhoto1" name="image_url1" type="file" style="display:none">
+			</li>
+			<li>备注：<br><textarea id="remark" placeholder=""></textarea></li>		
+			<li style="border-top: none;">
+			<!-- <br><p>7、本次活动优学派仅按照中奖顾客需求提供购票服务，游玩期间发生的人身财产安全问题均由本人负责</p> -->
+			</li>
+			<input id="province" type="hidden">
+			<input id="city" type="hidden">
+			<input id="area" type="hidden">
+		</ul> 
+		<div id="goSubmit">保 存</div>
+	</div>
+	<script type="text/javascript" src="../css/layer/layer.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.picker.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/city.data-3.js"></script>
+	<script type="text/javascript" src="../js/swiper/swiper.min.js"></script>
+	<script type="text/javascript" charset="utf8"
+	src="../js/dataTables/jquery.js"></script>
+    <script type="text/javascript">		
+    
+	var ajaxInterval = null;
+	
+	$("#goSubmit").click(function(){
+		checkSubmit();
+	});
+	
+	document.getElementById("prizePhoto1").addEventListener('change',readFile1,false);
+   	$(function(){
+   		
+   		$("#uploadPhoto1").click(function(){
+   			$("#prizePhoto1").trigger("click");
+   		});
+
+   	});
+   	
+   	function checkSubmit(){
+   		var name = trim($("#name").val()),
+   			userId = $("#userId").val(),
+   			color = $("#color").val(),
+   			size = $("#size").val(),
+   			remark = $("#remark").val();
+   		if(name==''){
+   			layerMsg("请填写商品名");
+   			return false;
+   		}
+
+   		if(userId==''){
+   			layerMsg("请填写收货人");
+   			return false;
+   		}
+   		
+   		layer.open({
+		    content: '确定提交？',
+		    btn: ['确定', '取消'],
+		    yes: function(index){
+		       	layer.close(index);
+		       	var fileObj1 = document.getElementById('prizePhoto1').files[0]; // js 获取文件对象
+		    	if (typeof (fileObj1) == "undefined" || fileObj1 == null || fileObj1.size <= 0) {
+		    	   return;
+		    	}
+		       	   	
+		    	var formFile = new FormData();
+		    	formFile.append("name",name);
+		    	formFile.append("color",color);
+		    	formFile.append("size",size);
+		    	formFile.append("userId",userId);
+		    	formFile.append("remark",remark);
+		    	
+		    	var prizePhoto1Ready = false;
+	
+		    	if(fileObj1.size/1024 > 1025) { //大于1M，进行压缩上传
+             		photoCompress(fileObj1, {
+                 	quality: 0.2
+	             	}, function(base64Codes){
+		                 var bl = convertBase64UrlToBlob(base64Codes);
+		                 formFile.append("file1", bl,"file_"+Date.parse(new Date())+".jpg"); // 文件对象
+		                 prizePhoto1Ready = true;
+	             	});
+		         }else{ //小于等于1M 原图上传
+		        	 formFile.append("file1", fileObj1); // 文件对象
+		        	 prizePhoto1Ready = true;
+		         }
+		    	
+		    	ajaxInterval = window.setInterval(function(){
+		    		if(prizePhoto1Ready){
+		   	        	window.clearInterval(ajaxInterval);
+		    			ajaxUrl(formFile);		    			
+		    		}
+		    	},500);
+   	}
+		    
+});
+	}
+   	
+   	function ajaxUrl(formFile){
+		$.ajax({
+   			processData: false,
+   			contentType: false,
+   			cache: false,
+   			type: 'POST',
+   	    	dataType: "json",
+   	        url: "/order/addorder.json",
+   	        data: formFile,
+   			async: false,
+   			timeout: 300000,
+   			beforeSend: function(){
+   				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>数据上传中</span>'
+				});
+				},
+   	        success: function(data){
+   	        	layer.closeAll();
+   	        	var msgcode = data.code,
+   	        		message = data.message;
+   	        	if(msgcode==1){
+   	        		layerMsg("保存成功！");
+   	        	}else{
+   	        		layerMsg("保存失败！");
+   	        	}
+   	        },
+   			error: function(){
+   				layer.closeAll();
+   				layerMsg("网络出错！");
+   			}
+   		});
+    }
+   
+ 	var xhr;
+   	function readFile1(){ 
+	    var file = this.files[0]; //获取file对象
+	    if(!/image\/\w+/.test(file.type)){//判断file的类型是不是图片类型
+	        layerTip("文件必须为图片！");
+	        return false; 
+	    } 
+	    var reader = new FileReader();
+	    reader.readAsDataURL(file); 
+	    reader.onload = function(e){
+	        $("#uploadPhoto1").attr("data-img",this.result).html("<img src="+this.result+">");
+	    } 	    
+	}
+   	
+	(function($, doc) {
+		$.init();
+	})(mui, document);
+	
+	 function photoCompress(file,w,objDiv){
+         var ready=new FileReader();
+         /*开始读取指定的Blob对象或File对象中的内容. 当读取操作完成时,readyState属性的值会成为DONE,如果设置了onloadend事件处理程序,则调用之.同时,result属性中将包含一个data: URL格式的字符串以表示所读取文件的内容.*/
+         ready.readAsDataURL(file);
+         ready.onload=function(){
+             var re=this.result;
+             canvasDataURL(re,w,objDiv);
+         }
+     }
+     function canvasDataURL(path, obj, callback){
+         var img = new Image();
+         img.src = path;
+         img.onload = function(){
+             var that = this;
+             // 默认按比例压缩
+             var w = that.width,
+                 h = that.height,
+                 scale = w / h;
+             w = obj.width || w;
+             h = obj.height || (w / scale);
+             var quality = 0.7;  // 默认图片质量为0.7
+             //生成canvas
+             var canvas = document.createElement('canvas');
+             var ctx = canvas.getContext('2d');
+             // 创建属性节点
+             var anw = document.createAttribute("width");
+             anw.nodeValue = w;
+             var anh = document.createAttribute("height");
+             anh.nodeValue = h;
+             canvas.setAttributeNode(anw);
+             canvas.setAttributeNode(anh);
+             ctx.drawImage(that, 0, 0, w, h);
+             // 图像质量
+             //if(obj.quality && obj.quality <= 1 && obj.quality > 0){
+                 quality = obj.quality;
+             //}
+             // quality值越小，所绘制出的图像越模糊
+             var base64 = canvas.toDataURL('image/jpeg', quality);
+             // 回调函数返回base64的值
+             callback(base64);
+         }
+     }
+     /**
+      * 将以base64的图片url数据转换为Blob
+      * @param urlData
+      *            用url方式表示的base64图片数据
+      */
+     function convertBase64UrlToBlob(urlData){
+         var arr = urlData.split(','), mime = arr[0].match(/:(.*?);/)[1],
+             bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+         while(n--){
+             u8arr[n] = bstr.charCodeAt(n);
+         }
+         return new Blob([u8arr], {type:mime});
+     }
+
+   	function trim(str){
+   		return str.replace(/(^\s+|\s$)/g,"");
+   	}
+   	function layerMsg(content){
+   		layer.open({
+	    	content: content,
+	    	skin: 'msg',
+	    	time: 3
+	  	});
+   		
+	  	layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+   	}
+ 	function layerTip(content){
+ 		layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+ 	}
+	</script>
+</body>
+</html>

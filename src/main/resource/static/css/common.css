@@ -1,0 +1,102 @@
+@charset "UTF-8";
+
+table {
+	border: solid #add9c0;
+	border-width: 1px 0px 0px 1px;
+}
+
+th {
+	border: solid #add9c0;
+	border-width: 0px 1px 1px 0px;
+	padding: 10px 0px;
+}
+
+td {
+	border: solid #add9c0;
+	border-width: 0px 1px 1px 0px;
+	padding: 10px 0px;
+}
+
+table.dataTable.no-footer {
+	margin-top: 6px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+	margin-left: 0px;
+}
+
+.button {
+	z-index: 999;
+	width: 84px;
+	height: 30px;
+	line-height: 33px;
+	background-color: #32c604;
+	color: #fff;
+	text-align: center;
+	font-size: 16px;
+	cursor: pointer;
+	margin-bottom: 8px;
+	float: left;
+	margin-left: 15%;
+	border-radius: 5px;
+}
+
+.little_button {
+	z-index: 999;
+	width: 58px;
+	height: 21px;
+	line-height: 25px;
+	background-color: #32c604;
+	color: #fff;
+	text-align: center;
+	font-size: 16px;
+	cursor: pointer;
+	margin-bottom: 8px;
+	float: left;
+	margin-left: 3%;
+	border-radius: 5px;
+}
+
+.little_button_pay {
+	z-index: 999;
+	width: 60px;
+	height: 21px;
+	line-height: 23px;
+	background-color: #32c604;
+	color: #fff;
+	text-align: center;
+	font-size: 16px;
+	cursor: pointer;
+	float: left;
+	margin-left: 3%;
+	border-radius: 5px;
+}
+
+.little_button_notpay {
+	z-index: 999;
+	width: 60px;
+	height: 21px;
+	line-height: 23px;
+	background-color: #E56130;
+	color: #fff;
+	text-align: center;
+	font-size: 16px;
+	cursor: pointer;
+	float: left;
+	margin-left: 3%;
+	border-radius: 5px;
+}
+
+.exit_img {
+	position: absolute;
+    right: 15px;
+    top: 15px;	
+    z-index: 99;
+}
+
+.qiehuan_img {
+	position: absolute;
+    right: 53px;
+    top: 15px;	
+    z-index: 99;
+}

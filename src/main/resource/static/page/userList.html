@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>用户列表</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="renderer" content="webkit">
+<meta name="viewport"
+	content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no" />
+<link rel="stylesheet" type="text/css"
+	href="../css/dataTables/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css"
+	href="../css/table.css">
+<link rel="stylesheet" type="text/css" href="../css/layui/css/layui.css">
+<link rel="stylesheet" type="text/css" href="../css/common.css">
+
+
+<script type="text/javascript" charset="utf8"
+	src="../js/dataTables/jquery.js"></script>
+<script type="text/javascript" charset="utf8"
+	src="../js/dataTables/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8"
+	src="../js/common/common.js"></script>
+	<script type="text/javascript" src="../css/layer/layer.js"></script>
+
+<style type="text/css">
+.font {
+	color: #7a7a7a;
+}
+
+.exit_a {
+	color: #007cff;
+	font-size: 17px;
+	float: right;
+	text-decoration: underline;
+	cursor:pointer;
+}
+
+.button {
+	margin-left: 11%;
+	    width: 66px;
+}
+
+.centerDis{
+text-align: center;
+}
+</style>
+</head>
+<body class="font">
+	<!-- <img class = "qiehuan_img" src="../images/qiehuan.png" onclick="qiehuanTable(1);"></img> -->
+	<img class = "exit_img" src="../images/exit.png" onclick="exitLogin();"></img>
+	<div class="layui-tab">
+	  <ul class="layui-tab-title">
+	       <li id="id_orderlist">抢单列表</li>
+	       <li id="" class="layui-this">顾客列表</li>
+	  </ul>
+	</div>
+	<div style="text-align: center;">
+		<div style="text-align: -webkit-center; margin-top: 10px;">
+			<div class="button" id="synBuyer">同步</div>
+			<div class="button" onclick="choiceUsers();">挑选</div>
+			<div class="button" onclick="clearChoice();">清空</div>
+		</div>
+	</div>
+	<div>
+		<table id="id_table_list">
+			<thead>
+				<tr>
+					<th></th>
+					<th></th>
+					<th>顾客名</th>
+					<th>详细地址</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td></td>
+					<td></td>
+					<td>商品名</td>
+					<td>详细地址</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+<script type="text/javascript" charset="utf8">
+	var table;
+
+	$(document).ready(function() {
+			//配置DataTables默认参数
+			$.extend(
+					true,
+					$.fn.dataTable.defaults,
+					{
+						"oLanguage" : {
+							"sLengthMenu" : "每页显示 _MENU_ 条记录",
+							"sZeroRecords" : "对不起，查询不到任何相关数据",
+							"sInfo" : "当前显示 _START_ 到 _END_ 条，共 _TOTAL_条记录",
+							"sInfoEmtpy" : "找不到相关数据",
+							"sInfoFiltered" : "数据表中共为 _MAX_ 条记录)",
+							"sProcessing" : "正在加载中...",
+							"sSearch" : "搜索",
+							"oPaginate" : {
+								"sFirst" : "第一页",
+								"sPrevious" : "<<",
+								"sNext" : ">> ",
+								"sLast" : "最后一页 "
+							}
+						},
+						"bAutoWidth": false,
+						"dom" : "<'row'<'col-md-6'l<'#toolbar'>><'col-md-6'f>r>"
+								+ "t"
+								+ "<'row'<'col-md-5 sm-center'i><'col-md-7 text-right sm-center'p>>"
+					});
+
+			testNet();
+		});
+	
+		/**
+		*测试登录
+		**/
+		function testNet(){
+			$.ajax({
+	   			type: 'POST',
+	   	        url: "/user/test.json",
+	   			async: false,
+	   			timeout: 300000,
+	   			beforeSend: function(){
+				},
+	   	        success: function(data){
+	   	        	var msgcode = data.code,
+	   	        		message = data.message;
+	   	        	if(msgcode == null){
+	   	        		data = JSON.parse(data);
+	   	        		msgcode = data.code,
+	   	        		message = data.message;
+	   	        	}
+	   	        	if(msgcode==1){
+	   	        		initData();
+	   	        	}else if(msgcode==4){
+	   	        		window.location.href="/page/login.html";
+	   	        	}
+	   	        },
+	   			error: function(){
+	   				debugger;
+	   				layerMsg("网络出错！");
+	   			}
+	   		});
+		}
+		
+		function initData(){
+			table = $('#id_table_list').DataTable(
+				{
+					"ordering": false,
+					ajax : {
+						url : "/user/userlist.json?pageNo=1&pageSize=10",
+						dataSrc : ""
+					},
+					bLengthChange: false,
+					columnDefs : [
+							{
+								targets : 0,
+		                        "sTitle": "<input type='checkbox' onclick='checkBoxUserAll(this)' id='id_checkBoxUserAll'/>",
+		                        "orderable": false,
+		                        "sWidth": "20",
+		                        "class":"centerDis",
+		                        data :"choice",
+		                        "mRender": function (data,type, row, meta) {
+		                        	var checkedOr = "";
+		                        	if(data == 1){
+		                        		checkedOr = "checked='checked'";
+		                        	}
+		                            var userId = row.id;
+		                            var btnBind = "<label><input type='checkbox' "+checkedOr+" name='checkBoxUser' value='" + userId + "'/></label>";
+		                            return btnBind;
+		                        }
+		                    },
+							{
+								targets : 1,
+				                "class": 'details-control',
+				                "orderable":      false,
+				                "data":           null,
+				                "defaultContent": ''
+				            },
+							{
+								targets : 2,
+								data : "realName",
+								title : "顾客名",
+								render : function(data,
+										type, row, meta) {
+									return data;
+								}
+							},
+							{
+								targets : 3,
+								data : "addressDetail",
+								title : "详细地址",
+								render : function(data,
+										type, row, meta) {
+									return data;
+								}
+							} ]
+				});
+			
+				// Add event listener for opening and closing details
+			    $('#id_table_list tbody').on('click', 'td.details-control', function () {
+			        var tr = $(this).closest('tr');
+			        var row = table.row( tr );
+			        if ( row.child.isShown() ) {
+			            // This row is already open - close it
+			            row.child.hide();
+			            tr.removeClass('shown');
+			        }
+			        else {
+			            // Open this row
+			            row.child( format(row.data()) ).show();
+			            tr.addClass('shown');
+			        }
+			    } );
+          }
+		
+		/**
+		*提示
+		**/
+		function layerMsg(content){
+	   		layer.open({
+		    	content: content,
+		    	skin: 'msg',
+		    	time: 3
+		  	});
+	   		
+		  	layer.open({
+			    content: content,
+			    btn: '确定'
+			});
+	   	}
+		
+		$("#synBuyer").click(function(){
+			$.ajax({
+	   			type: 'POST',
+	   	        url: "/user/synbuyer.json",
+	   			async: true,
+	   			timeout: 300000,
+	   			beforeSend: function(){
+	   				layer.open({
+						type: 2,
+						shadeClose: false,
+					    content: '<span style=color:#fff>同步中</span>'
+					});
+				},
+	   	        success: function(data){
+	   	        	var msgcode = data.code,
+	   	        		message = data.message;
+
+	   	        	if(msgcode==1){
+	   	        		layer.closeAll();
+	   	        		layerMsg("同步成功！");
+	   	        	}else if(msgcode==2){
+	   	        		layer.closeAll();
+	   	        		layerMsg("同步失败！请联系管理员");
+	   	        	}
+	   	        },
+	   			error: function(){
+	   				layer.closeAll();
+	   				layerMsg("网络出错！");
+	   			}
+	   		});
+		});
+		/* Formatting function for row details - modify as you need */
+		function format ( d ) {
+		    // `d` is the original data object for the row
+			var setDefault="";
+		    if(d.defaultBuyer==1){
+		    	setDefault = '<div class="little_button_notpay" onclick="changeDefault('+d.id+","+d.defaultBuyer+');">取消</div>';
+		    }else{
+		    	setDefault = '<div class="little_button_pay" onclick="changeDefault('+d.id+","+d.defaultBuyer+');">设置</div>';
+		    }
+		    
+		    return '<table cellpadding="4" cellspacing="0" border="0" style="padding-left:50px;">'+
+				'<tr>'+
+		            '<td>默认:</td>'+
+		            '<td>'+setDefault+'</td>'+
+		        '</tr>'+     
+				    '<tr>'+
+		            '<td>省:</td>'+
+		            '<td>'+d.province+'</td>'+
+		        '</tr>'+
+		        '<tr>'+
+		            '<td>市:</td>'+
+		            '<td>'+d.city+'</td>'+
+		        '</tr>'+
+		        '<tr>'+
+		            '<td>区/县:</td>'+
+		            '<td>'+d.county+'</td>'+
+		        '</tr>'+
+		        '<tr>'+
+		            '<td>电话:</td>'+
+		            '<td>'+d.tel+'</td>'+
+		        '</tr>'+
+		        //'<tr>'+
+		        //    '<td>详细地址:</td>'+
+		       //     '<td style="width: 69%;">'+d.addressDetail+'</td>'+
+	        	//'</tr>'+
+		    '</table>';
+		}
+		
+  $("#id_orderlist").click(function(){
+	  window.location.href="../pagenew/grabListNew.html"
+  });
+  
+  function checkBoxUserAll(e){
+	 var isAllCheck = $(e).is(':checked');
+	 var checkedBoxUsers = $("input[name='checkBoxUser']");
+	 if(isAllCheck){
+		 $(checkedBoxUsers).each(function () {
+	         $(this).prop("checked",true);
+	     });
+	 }else{
+		 $(checkedBoxUsers).each(function () {
+	         $(this).prop("checked",false);
+	     });
+	 }
+    
+  }
+  
+  function clearChoice(){
+	  $.ajax({
+ 			type: 'POST',
+ 	        url: "/user/clearchoice.json",
+ 			async: false,
+ 			timeout: 300000,
+ 			beforeSend: function(){
+ 				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>清除中</span>'
+				});
+			},
+ 	        success: function(data){
+ 	        	var msgcode = data.code,
+ 	        		message = data.message;
+
+ 	        	if(msgcode==1){
+ 	        		layer.closeAll();
+ 	        		layerMsg("清除成功！");
+ 	        		table.ajax.reload();
+ 	        		$("#id_checkBoxUserAll").prop("checked",false);
+ 	        	}else if(msgcode==2){
+ 	        		layer.closeAll();
+ 	        		layerMsg("清除失败！");
+ 	        	}
+ 	        },
+ 			error: function(){
+ 				layer.closeAll();
+ 				layerMsg("网络出错！");
+ 			}
+ 		});
+  }
+  
+  function choiceUsers(){
+	  var checkedBoxUsers = $("input[name='checkBoxUser']");
+	  
+	  var isChecked;
+	  var checkId;
+	  var idCheckMap;
+	  var checkList = [];
+	  $(checkedBoxUsers).each(function () {
+		  isChecked = $(this).is(":checked");
+		  checkId = $(this).val();
+		  
+		  idCheckMap={};
+		  idCheckMap.id = checkId;
+		  if(isChecked){
+			  idCheckMap.choice = 1;
+		  }else{
+			  idCheckMap.choice = 0;
+		  }
+		  
+		  checkList.push(idCheckMap);
+     });
+	  $.ajax({
+			type: 'POST',
+	        url: "/user/choiceusers.json",
+			async: true,
+			data:JSON.stringify(checkList),
+			dataType: "json",
+			contentType: 'application/json',
+			timeout: 300000,
+			beforeSend: function(){
+				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>挑选中</span>'
+				});
+			},
+	        success: function(data){
+	        	var msgcode = data.code,
+	        		message = data.message;
+
+	        	if(msgcode==1){
+	        		layer.closeAll();
+	        		layerMsg("挑选成功！");
+	        		table.ajax.reload();
+	        		$("#id_checkBoxUserAll").prop("checked",false);
+	        	}else if(msgcode==2){
+	        		layer.closeAll();
+	        		layerMsg("挑选失败！");
+	        	}
+	        },
+			error: function(){
+				layer.closeAll();
+				layerMsg("网络出错！");
+			}
+		});
+	 
+  }
+  
+  /**
+  *设置默认
+  **/
+  function changeDefault(id,nowDefault){
+	  $.ajax({
+			type: 'POST',
+	        url: "/user/changedefault.json",
+			async: true,
+			data:{"id":id,"nowDefault":nowDefault},
+			timeout: 300000,
+			beforeSend: function(){
+				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>设置中</span>'
+				});
+			},
+	        success: function(data){
+	        	var msgcode = data.code,
+	        		message = data.message;
+
+	        	if(msgcode==1){
+	        		layer.closeAll();
+	        		layerMsg("设置成功！");
+	        		table.ajax.reload();
+	        	}else if(msgcode==2){
+	        		layer.closeAll();
+	        		layerMsg("设置失败！");
+	        	}
+	        },
+			error: function(){
+				layer.closeAll();
+				layerMsg("网络出错！");
+			}
+		});
+  }
+</script>
+
+</html>

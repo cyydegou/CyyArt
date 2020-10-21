@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cyyGroup.cyyArt.money.dao.GrabDao">
+<select id="getGrabList" resultType="cyyGroup.cyyArt.vo.ShoppingCart">
+       SELECT
+       		a.id,
+			a. NAME AS title,
+			b.real_name AS 'user.realName',
+			a.create_time AS createTime,
+			a.grab_time AS grabTime,
+			a.`status` as status,
+			a.thumb_url,
+			a.sku,
+			a.num,
+			a.order_id    as orderNo,
+			a.remark,
+			a.goods_id_new,
+			a.from_type as fromType
+		FROM
+			t_grab a
+		INNER JOIN t_user b ON a.user_id = b.id
+		where a.from_type in 
+		<foreach item="item" index="index" collection="fromTypes" open="(" separator="," close=")">  
+		   #{item,jdbcType=NUMERIC}
+		</foreach>
+		and a.belong_id = #{userId,jdbcType=NUMERIC}
+		order by a.create_time desc
+    </select>
+    
+    <insert id="saveShoppingCart">
+       INSERT INTO t_grab (
+				NAME,
+				user_id,
+				create_time,
+				grab_time,
+				STATUS,
+				thumb_url,
+				sku,
+				goods_id,
+				kdt_id,
+				buyer_id,
+				sku_id,
+				session_id,
+				order_id,
+				remark,
+				created_time,
+				updated_time,
+				num,
+				goods_id_new,
+				from_type,
+				belong_id
+			)values(
+	        #{shoppingCart.title,jdbcType=VARCHAR},
+	        #{shoppingCart.user.id,jdbcType=NUMERIC},
+	        now(),
+	        #{shoppingCart.grabTime,jdbcType=DATE},
+	        1,
+	        #{shoppingCart.thumb_url,jdbcType=VARCHAR},
+	        #{shoppingCart.sku,jdbcType=VARCHAR},
+	        #{shoppingCart.goods_id,jdbcType=NUMERIC},
+	        #{shoppingCart.kdt_id,jdbcType=VARCHAR},
+	        #{shoppingCart.buyer_id,jdbcType=NUMERIC},
+	        #{shoppingCart.sku_id,jdbcType=NUMERIC},
+	        #{shoppingCart.nobody,jdbcType=VARCHAR},
+	        null,
+	        #{remark,jdbcType=VARCHAR},
+	        #{shoppingCart.created_time,jdbcType=BIGINT},
+	        #{shoppingCart.updated_time,jdbcType=BIGINT},
+	        #{shoppingCart.num,jdbcType=NUMERIC},
+	        #{shoppingCart.goods_id_new,jdbcType=VARCHAR},
+	        #{shoppingCart.fromType,jdbcType=NUMERIC},
+	        #{shoppingCart.belongId,jdbcType=NUMERIC}
+	       )
+    </insert>
+    
+    <select id="getGrabListByStatus" resultType="cyyGroup.cyyArt.vo.ShoppingCart">
+       SELECT
+       		a.id,
+			a. NAME AS title,
+			b.real_name AS 'user.realName',
+			b.id as 'user.id',
+			a.create_time AS createTime,
+			a.grab_time AS grabTime,
+			a.`status` as status,
+			a.thumb_url,
+			a.sku,
+			a.goods_id,
+			a.kdt_id,
+			a.buyer_id,
+			a.sku_id,
+			a.session_id,
+			a.order_id    as orderNo,
+			a.num,
+			a.created_time,
+			a.updated_time,
+			a.session_id as nobody,
+			a.remark,
+			a.goods_id_new,
+			a.from_type as fromType
+		FROM
+			t_grab a
+		INNER JOIN t_user b ON a.user_id = b.id
+		where a.status = #{status,jdbcType=VARCHAR}
+    </select>
+    
+    <delete id="deleteGrab">
+    	delete from t_grab where id = #{id,jdbcType=NUMERIC}
+    </delete>
+    
+    <update id="updateStatusById">
+    	update t_grab 
+    	   set 
+    	   	   <if test="orderNo != null">
+    	   	   		order_id = #{orderNo,jdbcType=VARCHAR},
+    	   	   </if>
+    	   	   <if test="remark != null">
+    	   	   		remark = #{remark,jdbcType=VARCHAR},
+    	   	   </if>
+    	       status =  #{status,jdbcType=NUMERIC}
+    	 where id = #{id,jdbcType=NUMERIC}
+    </update>
+    
+    <update id="updateGrabTimeById">
+    	update t_grab 
+    	   set grab_time =  #{dateS,jdbcType=DATE}
+    	 where id = #{id,jdbcType=NUMERIC}
+    </update>
+    
+    <select id="getLastGrabList" resultType="cyyGroup.cyyArt.vo.ShoppingCart">
+       SELECT
+       		a.id,
+			a. NAME AS title,
+			a.create_time AS createTime,
+			a.grab_time AS grabTime,
+			a.`status` as status,
+			a.thumb_url,
+			a.sku,
+			a.num,
+			a.order_id    as orderNo,
+			a.remark,
+			a.goods_id_new,
+			a.from_type as fromType
+		FROM
+			t_grab a
+		where a.from_type = #{fromType,jdbcType=NUMERIC}
+		order by a.create_time desc
+		limit 1
+    </select>
+    
+    <select id="getGrabById" resultType="cyyGroup.cyyArt.vo.ShoppingCart">
+       SELECT
+       		a.id,
+			a. NAME AS title,
+			a.create_time AS createTime,
+			a.grab_time AS grabTime,
+			a.`status` as status,
+			a.thumb_url,
+			a.sku,
+			a.num,
+			a.order_id    as orderNo,
+			a.remark,
+			a.goods_id_new,
+			a.from_type as fromType,
+			a.user_id as 'user.id'
+		FROM
+			t_grab a
+		where a.id = #{id,jdbcType=NUMERIC}
+    </select>
+    
+</mapper>

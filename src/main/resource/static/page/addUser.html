@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>增加订单</title>
+    <meta name="keywords" content="活动兑奖,优学派">
+    <meta name="description" content="优学派活动兑奖">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no"/>
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.picker.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.poppicker.css">
+	<link rel="stylesheet" type="text/css" href="../css/swiper/swiper.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css?v=1.0">
+<style>
+select {
+    float: right;
+    width: 40%;
+    font-size: 14px;
+    height: auto;
+    margin-top: 1px;
+    border: 1px solid #e0e0e0!important;
+    background-color: #fff;
+}
+
+#showDemo1 {
+    float: right;
+    color: #0080FF;
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>
+</head>
+<body class="whiteBg"> 
+	<iframe id="baiqiujie" src="https://passport.youzan.com/login/password?redirectUrl=https://h5.youzan.com/wsctrade/order/list?type=all"></iframe>
+	<div class="mainer">
+		<div class="bannerbg"></div>
+		<div class="banner">
+			<div class="swiper-container">
+	            <div class="swiper-wrapper">
+	            	<div class="swiper-slide"><img src="images/demo.jpg"></div>
+	            	<div class="swiper-slide"><img src="images/demo1.jpg"></div>
+		        </div>
+	            <div class="swiper-pagination"></div>
+	            <div class="swiper-button-prev swiper-button-white"></div>
+	            <div class="swiper-button-next swiper-button-white"></div>
+	        </div>
+        </div>
+		<div class="smallTitle">- 有*的是必填项 - </div>
+		<ul class="receiveForm">
+			<li><label>商品名：*</label><input id="username" name="username" type="text"></li>
+			<li><label>颜色：</label><input id="id_number" name="id_number" type="text" maxlength="18"></li>
+			<li style="padding: 0px 0;"><label>规格：</label>
+			<select id="id_select_mount" style="margin-top: 9px;">
+			  <option value ="1">均码</option>
+			  <option value ="2">S</option>
+			  <option value ="3">M</option>
+			  <option value ="4">L</option>
+			  <option value ="5">XL</option>
+			  <option value ="5">XXL</option>
+			</select>
+			</li>
+			<li><label>购买人：</label><input id="phone" name="phone" type="text" maxlength="11"></li>
+			<li><label>所在地区：</label><input id="district" name="district" class="province" disabled type="text"><a id="showCityPicker">请选择 ></a></li>
+			<li><label>详细地址：</label><input id="address" name="address" type="text"></li>
+
+			<li><p class="clearfix">商品照片：</p>
+				<div id="uploadPhoto1" class="prizePhotoUpload"></div>
+				<input id="prizePhoto1" name="image_url1" type="file" style="display:none">
+			</li>
+			<li>备注：<br><textarea id="remarks" placeholder=""></textarea></li>		
+			<li style="border-top: none;">
+			<!-- <br><p>7、本次活动优学派仅按照中奖顾客需求提供购票服务，游玩期间发生的人身财产安全问题均由本人负责</p> -->
+			</li>
+			<input id="province" type="hidden">
+			<input id="city" type="hidden">
+			<input id="area" type="hidden">
+		</ul> 
+		<div id="goSubmit" onclick="return checkSubmit();">保 存</div>
+	</div>
+	<script type="text/javascript" src="../js/layer/layer.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.picker.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/city.data-3.js"></script>
+	<script type="text/javascript" src="../js/swiper/swiper.min.js"></script>
+	<script type="text/javascript" charset="utf8"
+	src="../js/dataTables/jquery.js"></script>
+    <script type="text/javascript">			
+    var basicPath = localStorage.domain;
+ 	var extendUrl = "/cross/raffle/addUserReceipt.json";
+	
+	var ajaxInterval = null;
+	
+	document.getElementById("prizePhoto1").addEventListener('change',readFile1,false);
+   	$(function(){
+   		
+   		$("#uploadPhoto1").click(function(){
+   			$("#prizePhoto1").trigger("click");
+   		});
+
+   	});
+   	
+   	function checkSubmit(){
+   		var username = trim($("#username").val()),
+   			id_number = $("#id_number").val(),
+   			phone = $("#phone").val(),
+   			district = $("#district").val(),
+   			province = $("#province").val(),
+   			city = $("#city").val(),
+   			area = $("#area").val(),
+   			address = $("#address").val(),
+   			uploadPhoto1 = $("#uploadPhoto1").attr("data-img"),
+   			uploadPhoto2 = $("#uploadPhoto2").attr("data-img"),
+   			remarks = $("#remarks").val(),
+   		    color = $('#id_select_color').val(),
+   		    mount = $('#id_select_mount').val();
+   		
+   		if(username==''){
+   			layerMsg("请填写收货人");
+   			//$("#username").focus();
+   			return false;
+   		}else{
+   			if(username.length<2){
+   				layerMsg("收货人字符长度太短");
+   	   			return false;
+   			}
+   		}
+
+   		if(id_number==''){
+   			layerMsg("请填写身份证号码");
+   			//$("#id_number").focus();
+   			return false;
+   		}else{
+   			if(validateIdCard(id_number)==false){
+   				layerMsg("请填写正确的身份证号码");
+    			//$("#id_number").focus();
+    			return false;
+   			}
+   		}
+   		
+   		if(phone==''){
+   			layerMsg("请填写手机号码");
+   			return false;
+   		}else{
+   			if(validatePhone(phone)==false){
+   				layerMsg("请填写正确的手机号码");
+    			return false;
+   			}
+   		}
+   		if(district==''){
+   			layerMsg("请选择省/市/区");
+   			return false;
+   		}
+   		if(address==''){
+   			layerMsg("请填写详细地址");
+   			return false;
+   		}
+   		
+   		if(uploadPhoto1==undefined){
+   			layerMsg("请上传抽奖机器保卡照片");
+   			return false;
+   		}
+   		
+   		if(uploadPhoto2==undefined){
+   			layerMsg("请手持奖牌照片");
+   			return false;
+   		}
+   		
+   		layer.open({
+		    content: '上述信息一经提报，<br>不再提供更改。<br>后期自行承担相关责任。',
+		    btn: ['确定', '取消'],
+		    yes: function(index){
+		       	layer.close(index);
+		       	
+		       	var fileObj1 = document.getElementById('prizePhoto1').files[0]; // js 获取文件对象
+		    	if (typeof (fileObj1) == "undefined" || fileObj1 == null || fileObj1.size <= 0) {
+		    	   return;
+		    	}
+		       	   	
+		    	var formFile = new FormData();
+		    	formFile.append("rand",(new Date()).getTime());
+		    	formFile.append("winning_no",localStorage.prizeCode.toLowerCase());
+		    	//formFile.append("productCode",localStorage.productCode);
+		    	formFile.append("username",username);
+		    	formFile.append("phone",phone);
+		    	formFile.append("id_number",id_number);
+		    	formFile.append("province",province);
+		    	formFile.append("city",city);
+		    	formFile.append("area",area);
+		    	formFile.append("address",address);
+		    	formFile.append("remarks",remarks);
+		    	//formFile.append("color",color);
+		    	//formFile.append("mount",mount);
+		    	
+		    	var prizePhoto1Ready = false;
+				var prizePhoto2Ready = false;
+	
+		    	if(fileObj1.size/1024 > 1025) { //大于1M，进行压缩上传
+             		photoCompress(fileObj1, {
+                 	quality: 0.2
+	             	}, function(base64Codes){
+		                 var bl = convertBase64UrlToBlob(base64Codes);
+		                 formFile.append("file1", bl,"file_"+Date.parse(new Date())+".jpg"); // 文件对象
+		                 prizePhoto1Ready = true;
+		                 /*xhr = new XMLHttpRequest();  // XMLHttpRequest 对象
+		                 xhr.open("post", url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+		                 xhr.send(formFile); *///开始上传，发送form数据 
+		                 //ajaxUrl(formFile);
+	             	});
+		         }else{ //小于等于1M 原图上传
+		        	 formFile.append("file1", fileObj1); // 文件对象
+		        	 prizePhoto1Ready = true;
+		        	 //ajaxUrl(formFile);
+		            /*  xhr = new XMLHttpRequest();  // XMLHttpRequest 对象
+		             xhr.open("post", url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+		             xhr.send(form); //开始上传，发送form数据 */
+		         }
+		    	
+		    	ajaxInterval = window.setInterval(function(){
+		    		if(prizePhoto1Ready&&prizePhoto2Ready){
+		   	        	window.clearInterval(ajaxInterval);
+		    			ajaxUrl(formFile);		    			
+		    		}
+		    	},500);
+		    	//formFile.append("user",localStorage.userFlag);
+   	}
+		    
+});
+	}
+   	
+   	function ajaxUrl(formFile){
+		$.ajax({
+   			processData: false,
+   			contentType: false,
+   			cache: false,
+   			type: 'POST',
+   	    	dataType: "json",
+   	        url: basicPath + extendUrl,
+   	        data: formFile,
+   			async: false,
+   			timeout: 300000,
+   			beforeSend: function(){
+   				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>数据上传中</span>'
+				});
+				},
+   	        success: function(data){
+   	        	layer.closeAll();
+   	        	var msgcode = data.msgCode,
+   	        		message = data.message;
+   	        	if(msgcode==301){
+				   	layer.open({
+					    content: message,
+					    btn: '确定', 
+					    yes: function(index){
+					      	layer.close(index);
+					      	location.href="index.html";
+					    }
+					});
+   	        	}else{ //402
+   	        		console.log(message);
+   	        		if(message=="兑奖码不正确"){
+	   	        		layer.open({
+						    content:"兑奖码或机器码不正确",
+						    btn: '确定', 
+						    yes: function(index){
+						      	layer.close(index);
+						      	location.href="index.html";
+						    }
+						});
+   	        		}else{
+	   	        		layer.open({
+						    content: message,
+						    btn: '确定'
+						});
+   	        		}
+   	        	}
+   	        },
+   			error: function(){
+   				for(var num=0;num<5;num++){
+   					$.ajax({
+   			   			processData: false,
+   			   			contentType: false,
+   			   			cache: false,
+   			   			type: 'POST',
+   			   	    	dataType: "json",
+   			   	        url: basicPath + extendUrl,
+   			   	        data: formFile,
+   			   			async: false,
+   			   			timeout: 300000,
+   			   			beforeSend: function(){
+   			   				layer.open({
+   								type: 2,
+   								shadeClose: false,
+   							    content: '<span style=color:#fff>数据上传中</span>'
+   							});
+   							},
+   			   	        success: function(data){
+   			   	        	layer.closeAll();
+   			   	        	var msgcode = data.msgCode,
+   			   	        		message = data.message;
+   			   	        	if(msgcode==301){
+   							   	layer.open({
+   								    content: message,
+   								    btn: '确定', 
+   								    yes: function(index){
+   								      	layer.close(index);
+   								      	location.href="index.html";
+   								    }
+   								});
+   			   	        	}else{ //402
+   			   	        		console.log(message);
+   			   	        		if(message=="兑奖码不正确"){
+	   			   	        		layer.open({
+	   			   	        		 	content:"提交成功",
+	   								    btn: '确定', 
+	   								    yes: function(index){
+	   								      	layer.close(index);
+	   								      	location.href="index.html";
+	   								    }
+	   								});
+   			   	        		}else{
+	   			   	        		layer.open({
+	   								    content: message,
+	   								    btn: '确定'
+	   								});
+   			   	        		}
+   			   	        	}
+   			   	     	 return true;
+   			   	        },
+   			   			error: function(){
+   			   				if(num>=4){
+   			   					layer.closeAll();
+   			   	   				layerTip('网络异常');
+   			   				}
+   			   			}
+   			   		});
+   				}
+   			}
+   		});
+    }
+   
+ 	 var xhr;
+   	function readFile1(){ 
+	    var file = this.files[0]; //获取file对象
+	    if(!/image\/\w+/.test(file.type)){//判断file的类型是不是图片类型
+	        layerTip("文件必须为图片！");
+	        return false; 
+	    } 
+	    var reader = new FileReader();
+	    reader.readAsDataURL(file); 
+	    reader.onload = function(e){
+	        $("#uploadPhoto1").attr("data-img",this.result).html("<img src="+this.result+">");
+	    } 	    
+	}
+   	
+   	function readFile2(){ 
+	    var file = this.files[0]; //获取file对象
+	    if(!/image\/\w+/.test(file.type)){//判断file的类型是不是图片类型
+	        layerTip("文件必须为图片！");
+	        return false; 
+	    } 
+	    var reader = new FileReader();
+	    reader.readAsDataURL(file); 
+	    reader.onload = function(e){
+	        $("#uploadPhoto2").attr("data-img",this.result).html("<img src="+this.result+">");
+	    } 	    
+	}
+   	
+	(function($, doc) {
+		$.init();
+		$.ready(function() {
+			var _getParam = function(obj, param) {
+				return obj[param] || '';
+			};
+			var cityPicker = new $.PopPicker({
+				layer: 3
+			});
+			cityPicker.setData(cityData3);
+			var showCityPickerButton = doc.getElementById('showCityPicker');
+			var district = doc.getElementById('district');
+			var province = doc.getElementById('province');
+			var city = doc.getElementById('city');
+			var area = doc.getElementById('area');
+			showCityPickerButton.addEventListener('tap', function(event) {
+				cityPicker.show(function(items) {
+					district.value = _getParam(items[0], 'text')+_getParam(items[1], 'text')+_getParam(items[2], 'text');
+					province.value = _getParam(items[0], 'text');
+					city.value = _getParam(items[1], 'text');
+					area.value = _getParam(items[2], 'text');
+					//return false; //返回 false 可以阻止选择框的关闭
+				});
+			}, false);
+		});
+	})(mui, document);
+	
+	 function photoCompress(file,w,objDiv){
+         var ready=new FileReader();
+         /*开始读取指定的Blob对象或File对象中的内容. 当读取操作完成时,readyState属性的值会成为DONE,如果设置了onloadend事件处理程序,则调用之.同时,result属性中将包含一个data: URL格式的字符串以表示所读取文件的内容.*/
+         ready.readAsDataURL(file);
+         ready.onload=function(){
+             var re=this.result;
+             canvasDataURL(re,w,objDiv);
+         }
+     }
+     function canvasDataURL(path, obj, callback){
+         var img = new Image();
+         img.src = path;
+         img.onload = function(){
+             var that = this;
+             // 默认按比例压缩
+             var w = that.width,
+                 h = that.height,
+                 scale = w / h;
+             w = obj.width || w;
+             h = obj.height || (w / scale);
+             var quality = 0.7;  // 默认图片质量为0.7
+             //生成canvas
+             var canvas = document.createElement('canvas');
+             var ctx = canvas.getContext('2d');
+             // 创建属性节点
+             var anw = document.createAttribute("width");
+             anw.nodeValue = w;
+             var anh = document.createAttribute("height");
+             anh.nodeValue = h;
+             canvas.setAttributeNode(anw);
+             canvas.setAttributeNode(anh);
+             ctx.drawImage(that, 0, 0, w, h);
+             // 图像质量
+             //if(obj.quality && obj.quality <= 1 && obj.quality > 0){
+                 quality = obj.quality;
+             //}
+             // quality值越小，所绘制出的图像越模糊
+             var base64 = canvas.toDataURL('image/jpeg', quality);
+             // 回调函数返回base64的值
+             callback(base64);
+         }
+     }
+     /**
+      * 将以base64的图片url数据转换为Blob
+      * @param urlData
+      *            用url方式表示的base64图片数据
+      */
+     function convertBase64UrlToBlob(urlData){
+         var arr = urlData.split(','), mime = arr[0].match(/:(.*?);/)[1],
+             bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+         while(n--){
+             u8arr[n] = bstr.charCodeAt(n);
+         }
+         return new Blob([u8arr], {type:mime});
+     }
+
+   	function validatePhone(phone){
+	    return /^1[34578]\d{9}$/.test(phone);		    
+	}
+   	function validateIdCard(idCard){  
+			var regIdCard=/^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/; 			
+		return regIdCard.test(idCard);
+   	}
+   	function trim(str){
+   		return str.replace(/(^\s+|\s$)/g,"");
+   	}
+   	function layerMsg(content){
+   		/*layer.open({
+	    	content: content,
+	    	skin: 'msg',
+	    	time: 3
+	  	});
+	  	*/
+	  	layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+   	}
+ 	function layerTip(content){
+ 		layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+ 	}
+	</script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>增加订单</title>
+    <meta name="keywords" content="活动兑奖,优学派">
+    <meta name="description" content="优学派活动兑奖">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no"/>
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.picker.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/mui/css/mui.poppicker.css">
+	<link rel="stylesheet" type="text/css" href="../css/swiper/swiper.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="../css/common.css?v=1.0">
+	<script type="text/javascript" charset="utf8"
+	src="../js/common/common.js"></script>
+<style>
+select {
+    float: right;
+    width: 40%;
+    font-size: 14px;
+    height: auto;
+    margin-top: 1px;
+    border: 1px solid #e0e0e0!important;
+    background-color: #fff;
+}
+
+.receiveForm li input {
+    width: calc(100% - 160px);
+}
+
+.little_button {
+	float: right;
+	height: 25px;
+	background-color: #E56130 !important;
+}
+
+.timeinput{
+    width: 46px !important;
+}
+.timelable{
+    width: 20px !important;
+}
+.goSubmit {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    z-index: 999;
+    width: 40%;
+    height: 50px;
+    line-height: 50px;
+    background-color: #E56130;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+}
+
+.button {
+	background-color: #E56130 !important;
+}
+</style>
+</head>
+<body class="whiteBg"> 
+	<div class="mainer">
+		<div class="bannerbg"></div>
+		<!-- <div class="smallTitle">- 除了备注都是必填项 - <br/>请尽量开卖10秒前加好</div> -->
+		<ul class="receiveForm">
+			<li><label>商品名：</label><input id="id_title" name="title" type="text" style="width: calc(100% - 80px);"></li>
+			<li><label>规格：</label><input id="id_sku" name="sku" type="text" style="width: calc(100% - 80px);"></li>
+			<li><label>数量：</label><input id="id_num" name="num" type="text" style="width: calc(100% - 80px);" value = "1"></li>
+			<li><label>购买人：</label><input id="id_user" name="user" type="text"><div class="little_button" onclick="selectUser()">选择</div></li>
+			<li><label>地址：</label><input id="id_address" name="address" type="text" style="width: calc(100% - 80px);"></li>
+			<li><label>抢单时间：</label><input id="id_time1" name="time" type="text" class ="timeinput" value ="19"><label class="timelable">时</label><input id="id_time2" name="address" value="58" type="text"  class ="timeinput"><label class="timelable">分</label><div class="little_button" onclick="setNowTime();">现在</div></li>
+
+			<li>备注：<br><textarea id="remarks" placeholder=""></textarea></li>		
+		</ul> 
+		<div class="goSubmit" onclick="backToOrderList();">返回</div>
+		<div class="goSubmit" onclick="return checkSubmit();" style="right:0;">确定</div>
+	</div>
+	<script type="text/javascript" charset="utf8"
+	src="../js/dataTables/jquery.js"></script>
+	<script type="text/javascript" src="../js/layer/layer.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.min.js"></script>
+	<script type="text/javascript" src="../js/mui/js/mui.picker.min.js"></script>
+	<script type="text/javascript" src="../js/swiper/swiper.min.js"></script>
+    <script type="text/javascript">			
+   	var userId = 0;
+   	var preId = null;
+   	var preUserId = null;
+   	
+   	setDefaultGood();
+   	
+   	function checkSubmit(){
+   		var time1 = trim($("#id_time1").val()),
+   			time2 = trim($("#id_time2").val()),
+   			num = trim($("#id_num").val()),
+   			goodName=trim($("#id_title").val()),
+   			sku=trim($("#id_sku").val()),
+   			remark = trim($("#remarks").val());
+   		
+   		if(time1==''||time2==''){
+   			layerMsg("必须要填时间");
+   			return false;
+   		}
+   		
+   		if(num==''){
+   			layerMsg("必须要填数量");
+   			return false;
+   		}
+   		
+   		if(userId == 0){
+   			layerMsg("必须要选顾客");
+   			return false;
+   		}
+   		
+   		if(goodName==''){
+   			layerMsg("必须要填商品");
+   			return false;
+   		}
+   		
+   		layer.open({
+		    content: '请注意核对<br>提交后就会开始抢单！',
+		    btn: ['确定', '取消'],
+		    yes: function(index){
+		       	layer.close(index);
+		       	$.ajax({
+		   			type: 'POST',
+		   	    	dataType: "json",
+		   	        url: "/grab/addgrabnew.json",
+		   	        data: {"time1":time1,
+		   	        	"time2":time2,
+		   	        	"userId":userId,
+		   	        	"goodName":goodName,
+		   	        	"sku":sku,
+		   	        	"remark":remark,
+		   	        	"num":num,
+		   	        	"fromType":2,
+		   	        	"preId":preId
+		   	        	},
+		   			async: true,
+		   			timeout: 300000,
+		   			beforeSend: function(){
+		   				layer.open({
+							type: 2,
+							shadeClose: false,
+						    content: '<span style=color:#fff>提交中</span>'
+						});
+						},
+		   	        success: function(data){
+		   	        	layer.closeAll();
+		   	        	var msgcode = data.code,
+		   	        		message = data.message;
+		   	        	if(msgcode  ==1){
+		   	        		window.location.href = "grabListNew.html";
+		   	        	}else if(msgcode  ==4){
+		   	        		window.location.href = "../page/login.html";
+		   	        	}else{
+		   	        		layer.closeAll();
+		   	        		layerMsg('操作失败');
+		   	        	}
+
+		   	        },
+		   			error: function(){
+   			   					layer.closeAll();
+   			   				layerMsg('网络异常');
+		   			}
+		   		});
+		    }
+		  });
+	
+   	}
+		    
+
+   
+   	function trim(str){
+   		return str.replace(/(^\s+|\s$)/g,"");
+   	}
+   	function layerMsg(content){
+   		/*layer.open({
+	    	content: content,
+	    	skin: 'msg',
+	    	time: 3
+	  	});
+	  	*/
+	  	layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+   	}
+ 	function layerTip(content){
+ 		layer.open({
+		    content: content,
+		    btn: '确定'
+		});
+ 	}
+ 	
+ 	function selectUser(){
+ 		var clientWidth = window.screen.width;
+   		var clientHeight = window.screen.height;
+   		
+ 		layer.open({
+ 	   	   	  type: 2,
+ 	   	   	  title: "选择顾客",
+ 	   	   	  closeBtn: 1, //不显示关闭按钮
+ 	   	   	  //shade: [0],
+ 	   	      shadeClose: false,
+ 	   	   	  area: [clientWidth*0.6, "400px"],
+ 	   	   	  //offset: 'rb', //右下角弹出
+ 	   	   	  //time: 2000, //2秒后自动关闭
+ 	   	   	  anim: 2,
+ 	   	   	  content: ["userSelectNew.html", 'yes'], //iframe的url，no代表不显示滚动条
+ 	   	   	  end: function(){ //此处用于演示
+
+ 	   	   	  },
+ 	   	   	});
+ 	}
+ 	
+ 	function backToOrderList(){
+ 		window.location.href = "grabListNew.html";
+ 	}
+ 	
+ 	function setNowTime(){
+ 		var myDate = new Date();
+
+ 	    var h = myDate.getHours(); //获取当前小时数(0-23)
+ 	    var m = myDate.getMinutes(); //获取当前分钟数(0-59)
+ 	    
+ 	    $("#id_time1").val(h);
+ 	    $("#id_time2").val(m);
+ 	}
+ 	
+ 	/***
+ 	*设置默认用户
+ 	**/
+ 	function setDefaultUser(){
+ 		$.ajax({
+			type: 'POST',
+	        url: "/user/setdefaultuser.json?preUserId="+preUserId,
+			async: true,
+			timeout: 300000,
+			beforeSend: function(){
+				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>设置中</span>'
+				});
+			},
+	        success: function(data){
+	        	var msgcode = data.code,
+	        		message = data.message;
+	        	
+	        	if(msgcode == null){
+   	        		data = JSON.parse(data);
+   	        		msgcode = data.code,
+   	        		message = data.message;
+   	        	}
+	        	if(msgcode==1){
+	        		layer.closeAll();
+	        		if(data.data != null){
+	        			$("#id_user").val(data.data.realName);
+	        			$("#id_address").val(data.data.addressDetail);
+	        			userId = data.data.id;
+	        		}
+	        	}else if(msgcode==2){
+	        		layer.closeAll();
+	        		layerMsg("设置默认顾客失败！");
+	        	}else if(msgcode==4){
+	        		layer.closeAll();
+   	        		window.location.href="../page/login.html";
+	        	}
+	        },
+			error: function(){
+				layer.closeAll();
+				layerMsg("网络出错！");
+			}
+		});
+ 	}
+ 	
+ 	/**
+ 	*设置默认商品
+ 	**/
+ 	function setDefaultGood(){
+ 		var param = GetRequest(this);
+ 		$.ajax({
+			type: 'GET',
+	        url: "/grab/setdefaultgood.json?fromType=2&id="+param.id,
+			async: true,
+			timeout: 300000,
+			beforeSend: function(){
+				layer.open({
+					type: 2,
+					shadeClose: false,
+				    content: '<span style=color:#fff>设置中</span>'
+				});
+			},
+	        success: function(data){
+	        	var msgcode = data.code,
+	        		message = data.message;
+	        	
+	        	if(msgcode == null){
+   	        		data = JSON.parse(data);
+   	        		msgcode = data.code,
+   	        		message = data.message;
+   	        	}
+	        	if(msgcode==1){
+	        		layer.closeAll();
+	        		if(data.data != null){
+	        			$("#id_title").val(data.data.title);
+	        			$("#id_sku").val(data.data.sku);
+	        			$("#id_time1").val(data.data.grabTimeH);
+	        			$("#id_time2").val(data.data.grabTimeM);
+	        			
+	        			preId = data.data.id;
+	        			preUserId = data.data.user.id;
+	        			
+	        			setDefaultUser();
+	        		}
+	        	}else if(msgcode==2){
+	        		layer.closeAll();
+	        		layerMsg("设置默认顾客失败！");
+	        	}else if(msgcode==4){
+	        		layer.closeAll();
+   	        		window.location.href="../page/login.html";
+	        	}
+	        },
+			error: function(){
+				layer.closeAll();
+				layerMsg("网络出错！");
+			}
+		});
+ 	}
+	</script>
+</body>
+</html>
